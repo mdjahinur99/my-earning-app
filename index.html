@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AdWatch - Earn Rewards</title>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Firebase Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    
+    <!-- === START: ADSENSE SCRIPT === -->
+    <!-- AdSense অনুমোদন পাওয়ার পর, আপনার পাবলিশার আইডি সহ স্ক্রিপ্ট কোডটি এখানে বসাবেন -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-xxxxxxxxxxxxxxxx"
+     crossorigin="anonymous"></script>
+    <!-- === END: ADSENSE SCRIPT === -->
+
+    <style>
+        /* CSS কোড অপরিবর্তিত থাকবে */
+        :root{--primary:#4a6cfa;--secondary:#ff9f43;--dark:#333;--light:#f8f9fa;--success:#28a745;--danger:#dc3545;--gray:#6c757d}*{-webkit-margin-before:0;-webkit-margin-after:0;margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif}body{background-color:#f0f2f5;color:var(--dark);line-height:1.6}.container{max-width:480px;margin:0 auto;padding:15px;background:white;min-height:100vh;box-shadow:0 0 15px rgba(0,0,0,.1)}header{background:linear-gradient(135deg,var(--primary),#6c8eff);color:white;padding:15px;border-radius:10px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center}.user-info{display:flex;align-items:center}.user-avatar{width:50px;height:50px;background:white;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--primary);font-weight:bold;margin-right:10px}.points-balance{background:rgba(255,255,255,.2);padding:5px 15px;border-radius:20px;font-weight:bold}nav{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}.nav-btn{background:white;border:none;padding:12px;border-radius:10px;box-shadow:0 3px 5px rgba(0,0,0,.1);display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:bold;color:var(--dark);cursor:pointer;transition:all .3s}.nav-btn:hover{transform:translateY(-3px);box-shadow:0 5px 10px rgba(0,0,0,.15)}.nav-btn i{font-size:24px;margin-bottom:5px;color:var(--primary)}.section{background:white;border-radius:10px;padding:15px;margin-bottom:20px;box-shadow:0 3px 5px rgba(0,0,0,.1)}.section-title{font-size:18px;margin-bottom:15px;padding-bottom:10px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center}.ad-container{display:grid;grid-template-columns:1fr;gap:15px;margin-bottom:20px; justify-items: center;}.ad-card{background:linear-gradient(135deg,#6c8eff,#4a6cfa);color:white;padding:15px;border-radius:10px;text-align:center; max-width: 280px;}.btn{border:none;padding:12px 15px;border-radius:25px;font-weight:bold;cursor:pointer;transition:all .3s;width:100%}.btn.primary{background:var(--primary);color:white}.btn:hover{opacity:.9;transform:scale(1.02)}
+        .wheel-container{position:relative;width:300px;height:300px;margin:20px auto}
+        #wheelCanvas{width:100%;height:100%;}
+        .wheel-pointer{position:absolute;top: -10px; left: 50%; transform: translateX(-50%); width: 30px; height: 40px; background-color: #ff4757; clip-path: polygon(50% 100%, 0 0, 100% 0); z-index: 10;}
+        .spin-btn{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width: 80px; height: 80px; background:transparent; border-radius:50%; cursor:pointer; z-index:10; border: none;}
+        .spins-left{text-align:center;margin-top:10px;font-weight:bold;font-size:18px;color:var(--primary)}.wheel-info{text-align:center;margin-top:15px;font-size:14px;color:var(--gray)}.result-popup{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:white;padding:20px;border-radius:10px;box-shadow:0 0 20px rgba(0,0,0,.3);z-index:1000;text-align:center}.result-popup h3{margin-bottom:10px;color:var(--primary)}.result-points{font-size:24px;font-weight:bold;color:var(--secondary);margin:10px 0}.close-popup{background:var(--primary);color:white;border:none;padding:8px 15px;border-radius:20px;cursor:pointer;margin-top:15px}.modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center}@keyframes fadeIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}.modal-content{background:white;width:90%;max-width:400px;border-radius:15px;padding:25px;position:relative;animation:fadeIn .3s ease-out}.close-modal{position:absolute;top:10px;right:15px;background:none;border:none;font-size:24px;cursor:pointer;color:var(--gray)}#authTitle{text-align:center;font-size:24px;font-weight:bold;color:var(--dark);margin-bottom:10px}#authSubtitle{text-align:center;font-size:14px;color:var(--gray);margin-bottom:25px}.input-group{position:relative;margin-bottom:20px}.input-group i{position:absolute;left:15px;top:50%;transform:translateY(-50%);color:var(--gray)}.input-group input{width:100%;padding:12px 15px 12px 45px;border:1px solid #ddd;border-radius:25px;background:#f0f2f5;transition:all .3s}.input-group input:focus{border-color:var(--primary);background:white;box-shadow:0 0 0 3px rgba(74,108,250,.2)}#authToggle{text-align:center;margin-top:20px;font-size:14px}#authToggleText{color:var(--primary);font-weight:bold;cursor:pointer}.divider{display:flex;align-items:center;text-align:center;color:var(--gray);margin:20px 0;font-size:14px}.divider::before,.divider::after{content:'';flex:1;border-bottom:1px solid #ddd}.divider:not(:empty)::before{margin-right:.5em}.divider:not(:empty)::after{margin-left:.5em}.btn-google{background-color:#fff;color:#333;border:1px solid #ddd;display:flex;align-items:center;justify-content:center}.btn-google:hover{background-color:#f8f9fa}.btn-google i{color:#DB4437;font-size:18px;margin-right:10px}.convert-box{background:#f0f2f5;padding:15px;border-radius:10px;margin-bottom:20px;border:1px solid #ddd}.convert-box h3{font-size:16px;margin-bottom:10px;color:var(--dark)}.convert-box input{width:100%;padding:10px;border:1px solid #ccc;border-radius:5px;margin-bottom:10px}.referral-box{background:#f8f9fa;padding:15px;border-radius:10px;margin-bottom:15px}.referral-id{display:flex;justify-content:space-between;align-items:center;background:white;padding:10px;border-radius:5px;margin-bottom:10px}.referral-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}.stat-card{background:white;padding:10px;border-radius:5px;text-align:center}.stat-value{font-size:20px;font-weight:bold;color:var(--primary)}.withdrawal-options{display:grid;grid-template-columns:1fr;gap:10px}.option-card{background:#f8f9fa;padding:15px;border-radius:10px;display:flex;justify-content:space-between;align-items:center}.option-info{display:flex;align-items:center}.option-info i{font-size:24px;margin-right:10px;color:var(--primary)}footer{text-align:center;padding:20px 0;color:var(--gray);font-size:14px}.form-group{margin-bottom:15px}.form-group label{display:block;margin-bottom:5px;font-weight:bold}.form-group input{width:100%;padding:10px;border:1px solid #ddd;border-radius:5px}
+        .profile-info-list { list-style: none; padding: 0; margin-bottom: 25px; }
+        .profile-info-list li { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f0f0f0; font-size: 16px; }
+        .profile-info-list li span:first-child { font-weight: bold; color: var(--dark); }
+        .profile-info-list li span:last-child { color: var(--gray); }
+        .history-item{display:flex;justify-content:space-between;align-items:center;padding:15px 10px;border-bottom:1px solid #eee;transition:background-color .2s ease-in-out}.history-item:last-child{border-bottom:none}.history-item:hover{background-color:#f8f9fa}.history-info{display:flex;flex-direction:column}.history-type{font-weight:bold;color:var(--dark);font-size:16px}.history-date{font-s_c_gpt_j_l_c_format_1ize:12px;color:var(--gray)}.history-details{text-align:right}.history-amount{font-size:18px;font-weight:bold;color:var(--primary);display:block}.history-status{display:inline-block;padding:3px 8px;border-radius:12px;font-size:12px;font-weight:bold;color:white;text-transform:capitalize}.history-status.pending{background-color:var(--secondary)}.history-status.confirmed{background-color:var(--success)}.history-status.rejected{background-color:var(--danger)}#no-history-message{text-align:center;padding:20px;color:var(--gray)}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Main HTML content here... -->
+        <header><div class="user-info"><div class="user-avatar">U</div><div><div class="username" id="username">Guest</div><div class="user-id">ID: <span id="userId">N/A</span></div></div></div><div class="points-balance"><span id="pointsValue">0</span> pts</div></header>
+        <nav><button class="nav-btn" onclick="showSection('tasks')"><i>📱</i>Start Task</button><button class="nav-btn" onclick="showSection('spin')"><i>🎡</i>Spin</button><button class="nav-btn" onclick="showSection('refer')"><i>👥</i>Refer</button><button class="nav-btn" onclick="showSection('withdraw')"><i>💰</i>Withdraw</button><button class="nav-btn" onclick="showSection('history')"><i>📊</i>History</button><button class="nav-btn" onclick="showSection('profile')"><i>👤</i>Profile</button></nav>
+        
+        <div id="tasksSection" class="section">
+            <h2 class="section-title">Complete Tasks & Earn Points</h2>
+            <div class="ad-container">
+                <div class="ad-card">
+                    <h3>Gat point</h3>
+                    <p>Watch ad and earn 30 points. Get 20 bonus points on every 10th task!</p>
+                    <button class="btn primary" onclick="watchAd()" style="border-radius: 20px; width: auto; margin-top: 10px;">Start Task</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="spinSection" class="section" style="display: none;"><h2 class="section-title">Spin & Win Points</h2><div class="wheel-container"><div class="wheel-pointer"></div><canvas id="wheelCanvas" width="300" height="300"></canvas><button class="spin-btn" id="spinButton" onclick="showAdBeforeSpin()"></button></div><div class="spins-left" id="spinsLeft">Spins left today: 20/20</div><div class="wheel-info"><p>Spin the wheel to win between 10 to 100 points!</p><p>Each spin requires watching an ad.</p></div></div>
+        <div id="withdrawSection" class="section" style="display: none;"><h2 class="section-title">Withdraw & Convert</h2><div class="convert-box"><h3>Convert Points to Taka</h3><p style="font-size: 14px; color: var(--gray); margin-bottom: 10px;">Rate: 1000 points = ৳2. Minimum 1000 points required.</p><input type="number" id="pointsToConvert" placeholder="Enter points to convert"><button class="btn primary" onclick="convertPoints()">Convert to Taka</button></div><h3 style="font-size: 16px; margin-bottom: 10px; margin-top: 20px;">Direct Withdrawal</h3><div class="withdrawal-options"><div class="option-card"><div class="option-info"><i>📱</i><div><div>Mobile Recharge</div><small>Min: ৳20</small></div></div><button class="btn primary" onclick="showWithdrawModal('recharge')" style="width:auto; border-radius: 20px;">Withdraw</button></div><div class="option-card"><div class="option-info"><i>💳</i><div><div>Bkash</div><small>Min: ৳50</small></div></div><button class="btn primary" onclick="showWithdrawModal('bkash')" style="width:auto; border-radius: 20px;">Withdraw</button></div><div class="option-card"><div class="option-info"><i>💰</i><div><div>Nagad</div><small>Min: ৳50</small></div></div><button class="btn primary" onclick="showWithdrawModal('nagad')" style="width:auto; border-radius: 20px;">Withdraw</button></div></div></div>
+        <div id="referSection" class="section" style="display: none;"><h2 class="section-title">Refer Friends & Earn</h2><div class="referral-box"><p>Share your referral code with friends and earn ৳2 for each signup!</p><div class="referral-id"><span>Your Referral ID: <strong id="referralId">N/A</strong></span><button class="btn primary" onclick="copyReferral()" style="width:auto; border-radius: 20px;">Copy</button></div></div><div class="referral-stats"><div class="stat-card"><div class="stat-value" id="referralCount">0</div><div class="stat-label">Referred</div></div><div class="stat-card"><div class="stat-value">৳<span id="referralEarningsValue">0.00</span></div><div class="stat-label">Earned</div></div></div></div>
+        <div id="historySection" class="section" style="display: none;"><h2 class="section-title">History</h2><div id="historyList"></div></div>
+        <div id="profileSection" class="section" style="display: none;"><h2 class="section-title">My Profile</h2><ul class="profile-info-list"><li><span>Name:</span> <span id="profileName">Loading...</span></li><li><span>Email:</span> <span id="profileEmail">Loading...</span></li><li><span>Phone:</span> <span id="profilePhone">Loading...</span></li><li><span>User ID:</span> <span id="profileUserId">Loading...</span></li><li><span>My Referral Code:</span> <span id="profileReferralCode">Loading...</span></li><li><span>Total Points:</span> <span id="profilePoints">Loading...</span></li><li><span>Total Earnings:</span> <span id="profileEarnings">Loading...</span></li><li><span>Last Login:</span> <span id="profileLastLogin">Loading...</span></li></ul><button class="btn danger" onclick="logout()" style="background-color: var(--danger);">Logout</button></div>
+        <div class="result-popup" id="resultPopup"><h3>Congratulations!</h3><p>You won</p><div class="result-points" id="resultPoints">50 points</div><p>They have been added to your account</p><button class="close-popup" onclick="closeResultPopup()">Great!</button></div>
+        <div class="modal" id="authModal"><div class="modal-content"><button class="close-modal" onclick="closeModal('authModal')">×</button><h2 id="authTitle">Welcome Back!</h2><p id="authSubtitle">Please enter your details to login.</p><div class="input-group" id="usernameGroup" style="display: none;"><i class="fas fa-user"></i><input type="text" id="authUsername" placeholder="Enter your username"></div><div class="input-group"><i class="fas fa-envelope"></i><input type="email" id="authEmail" placeholder="Enter your email"></div><div class="input-group"><i class="fas fa-phone"></i><input type="tel" id="authPhone" placeholder="Enter your phone number"></div><div class="input-group"><i class="fas fa-lock"></i><input type="password" id="authPassword" placeholder="Enter your password"></div><div class="input-group" id="confirmPasswordGroup" style="display: none;"><i class="fas fa-lock"></i><input type="password" id="authConfirmPassword" placeholder="Confirm your password"></div><div class="input-group" id="referralCodeGroup" style="display: none;"><i class="fas fa-gift"></i><input type="text" id="authReferralCode" placeholder="Referral Code (Optional)"></div><button class="btn primary" id="authActionButton" onclick="login()">Login</button><div class="divider">OR</div><button class="btn btn-google" onclick="signInWithGoogle()"><i class="fab fa-google"></i> Sign in with Google</button><p id="authToggle">Don't have an account? <span id="authToggleText" onclick="toggleAuthMode()">Sign Up</span></p></div></div>
+        <div class="modal" id="withdrawModal"><div class="modal-content"><button class="close-modal" onclick="closeModal('withdrawModal')">×</button><h2 id="modalTitle">Withdraw to Bkash</h2><div class="form-group"><label for="accountNumber">Account Number</label><input type="text" id="accountNumber" placeholder="Enter your account number"></div><div class="form-group"><label for="withdrawAmount">Amount (৳)</label><input type="number" id="withdrawAmount" placeholder="Enter amount"></div><button class="btn primary" onclick="processWithdrawal()">Confirm Withdrawal</button></div></div>
+        <div class="modal" id="vpnNoticeModal"><div class="modal-content" style="text-align: center;"><h2 style="font-size: 22px; margin-bottom: 15px; display: flex; align-items: center; justify-content: center;"><i class="fas fa-shield-alt" style="color: var(--primary); margin-right: 10px;"></i>গুরুত্বপূর্ণ নোটিশ</h2><p style="font-size: 16px; color: var(--success); font-weight: bold; margin-bottom: 25px;">নিয়ম মেনে কাজ করুন ইনশাল্লাহ পেমেন্ট পাবেন</p><button class="btn primary" onclick="closeModal('vpnNoticeModal')" style="width: auto; padding: 10px 30px;">বুঝেছি</button></div></div>
+        <footer><p>AdWatch © 2023 | Earn rewards by watching ads</p></footer>
+
+        <!-- === AD MODALS === -->
+        <div class="modal" id="adModal">
+            <div class="modal-content">
+                <button class="close-modal" onclick="closeAd()">×</button>
+                <h2 id="adTitle">Watching Ad</h2>
+                <div id="adTimer">00:30</div>
+                <div id="adContent" style="height: auto; background: #eee; display: flex; align-items: center; justify-content: center; margin: 15px 0; min-height: 200px;">
+                    <!-- === START: TASK AD UNIT (নমুনা) === -->
+                    <!-- AdSense অনুমোদন পাওয়ার পর, নিচের কোডটি আপনার নিজের কোড দিয়ে পরিবর্তন করবেন -->
+                    <ins class="adsbygoogle"
+                         style="display:block"
+                         data-ad-client="ca-pub-xxxxxxxxxxxxxxxx"
+                         data-ad-slot="yyyyyyyyyy"
+                         data-ad-format="auto"
+                         data-full-width-responsive="true"></ins>
+                    <script>
+                         (adsbygoogle = window.adsbygoogle || []).push({});
+                    </script>
+                    <!-- === END: TASK AD UNIT === -->
+                </div>
+                <p>Please watch the ad until completion to earn points.</p>
+            </div>
+        </div>
+
+        <div class="modal" id="spinAdModal">
+            <div class="modal-content">
+                <button class="close-modal" onclick="closeModal('spinAdModal')">×</button>
+                <h2 id="spinAdTitle">Watch Ad to Spin</h2>
+                <div id="spinAdTimer">00:30</div>
+                <div id="spinAdContent" style="height: auto; background: #eee; display: flex; align-items: center; justify-content: center; margin: 15px 0; min-height: 200px;">
+                    <!-- === START: SPIN AD UNIT (নমুনা) === -->
+                    <!-- AdSense অনুমোদন পাওয়ার পর, নিচের কোডটি আপনার নিজের কোড দিয়ে পরিবর্তন করবেন -->
+                    <ins class="adsbygoogle"
+                         style="display:block"
+                         data-ad-client="ca-pub-xxxxxxxxxxxxxxxx"
+                         data-ad-slot="zzzzzzzzzz"
+                         data-ad-format="auto"
+                         data-full-width-responsive="true"></ins>
+                    <script>
+                         (adsbygoogle = window.adsbygoogle || []).push({});
+                    </script>
+                     <!-- === END: SPIN AD UNIT === -->
+                </div>
+                <p>Please watch the ad until completion to spin the wheel.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // আপনার সম্পূর্ণ JavaScript কোড এখানে অপরিবর্তিত থাকবে
+        const firebaseConfig = {
+            apiKey: "AIzaSyCPq4nx2v09hT0Y9s6P06WisGH7nSDNXd0",
+            authDomain: "rawraed-to-earn.firebaseapp.com",
+            projectId: "rawraed-to-earn",
+            storageBucket: "rawraed-to-earn.firebasestorage.app",
+            messagingSenderId: "519028550201",
+            appId: "1:519028550201:web:d3fc6ed81f4d15eafffbe8"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        let userData = {};
+        let currentUser = null; 
+
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                currentUser = user;
+                loadUserData(user);
+            } else {
+                currentUser = null;
+                document.getElementById('username').textContent = "Guest";
+                document.getElementById('userId').textContent = "N/A";
+                document.getElementById('pointsValue').textContent = 0;
+                document.getElementById('referralCount').textContent = 0;
+                document.getElementById('referralEarningsValue').textContent = "0.00";
+                document.getElementById('referralId').textContent = "N/A";
+                showModal('authModal');
+            }
+        });
+
+        function createNewUserInFirestore(user, name, phone, referrerUid = "") {
+            const userRef = db.collection('user').doc(user.uid);
+            const referralCode = 'REF' + Math.random().toString(36).substring(2, 8).toUpperCase();
+            const newUserDoc = {
+                gmail: user.email,
+                name: name,
+                phone: phone,
+                myreferralCode: referralCode,
+                points: 0,
+                spinToday: 20,
+                totalEarning: 0,
+                lastlogingDate: firebase.firestore.FieldValue.serverTimestamp(),
+                referrelBy: referrerUid, 
+                referrelCodeApply: !!referrerUid, 
+                tasksCompletedThisHour: 0,
+                lastTaskTimestamp: new Date(0)
+            };
+            return userRef.set(newUserDoc).then(() => {
+                return db.collection('referralcodes').doc(referralCode).set({ uid: user.uid });
+            });
+        }
+
+        async function loadUserData(user) {
+            const userRef = db.collection('user').doc(user.uid);
+            try {
+                const doc = await userRef.get();
+                if (doc.exists) {
+                    userData = doc.data();
+                    document.getElementById('username').textContent = userData.name;
+                    document.getElementById('userId').textContent = user.uid.substring(0, 6).toUpperCase();
+                    document.getElementById('pointsValue').textContent = userData.points;
+                    document.getElementById('spinsLeft').textContent = `Spins left today: ${userData.spinToday}/20`;
+                    document.getElementById('referralId').textContent = userData.myreferralCode;
+                    document.getElementById('referralEarningsValue').textContent = (userData.totalEarning || 0).toFixed(2);
+                    document.getElementById('profileName').textContent = userData.name;
+                    document.getElementById('profileEmail').textContent = userData.gmail;
+                    document.getElementById('profilePhone').textContent = userData.phone || 'Not provided';
+                    document.getElementById('profileUserId').textContent = user.uid;
+                    document.getElementById('profileReferralCode').textContent = userData.myreferralCode;
+                    document.getElementById('profilePoints').textContent = userData.points;
+                    document.getElementById('profileEarnings').textContent = `৳ ${(userData.totalEarning || 0).toFixed(2)}`;
+                    if (userData.lastlogingDate && typeof userData.lastlogingDate.toDate === 'function') {
+                        document.getElementById('profileLastLogin').textContent = userData.lastlogingDate.toDate().toLocaleString();
+                    }
+                } else {
+                    console.log("User document not found, creating one for new user.");
+                    const name = user.displayName || "User " + user.uid.substring(0, 5);
+                    const phone = user.phoneNumber || "Not Provided";
+                    await createNewUserInFirestore(user, name, phone);
+                    await loadUserData(user);
+                    return;
+                }
+                if (!sessionStorage.getItem('vpnNoticeShown')) {
+                    setTimeout(() => { showModal('vpnNoticeModal'); sessionStorage.setItem('vpnNoticeShown', 'true'); }, 500);
+                }
+            } catch (error) { console.error("Error loading user data:", error); }
+        }
+
+        function updateUserInFirestore(dataToUpdate) {
+            if (!currentUser) return;
+            return db.collection('user').doc(currentUser.uid).update(dataToUpdate).catch(error => console.error("Error updating user data:", error));
+        }
+
+        async function signUp() {
+            const email = document.getElementById('authEmail').value;
+            const password = document.getElementById('authPassword').value;
+            const confirmPassword = document.getElementById('authConfirmPassword').value;
+            const phone = document.getElementById('authPhone').value;
+            const name = document.getElementById('authUsername').value;
+            const referralCode = document.getElementById('authReferralCode').value.trim();
+            if (!name || !email || !password || !phone) { alert("Please fill in all required fields."); return; }
+            if (password !== confirmPassword) { alert("Passwords do not match."); return; }
+            let referrerUid = "";
+            if (referralCode) {
+                try {
+                    const referralDoc = await db.collection('referralcodes').doc(referralCode).get();
+                    if (!referralDoc.exists) { alert("Invalid referral code provided."); return; }
+                    referrerUid = referralDoc.data().uid;
+                } catch (error) { console.error("Error validating referral code:", error); alert("Could not verify referral code."); return; }
+            }
+            auth.createUserWithEmailAndPassword(email, password)
+                .then(userCredential => {
+                    const user = userCredential.user;
+                    user.updateProfile({ displayName: name });
+                    createNewUserInFirestore(user, name, phone, referrerUid)
+                        .then(() => {
+                            if (referrerUid) {
+                                const referrerUserRef = db.collection('user').doc(referrerUid);
+                                db.runTransaction(transaction => {
+                                    return transaction.get(referrerUserRef).then(doc => {
+                                        if (!doc.exists) { throw "Referrer document does not exist!"; }
+                                        const newEarnings = (doc.data().totalEarning || 0) + 2;
+                                        transaction.update(referrerUserRef, { totalEarning: newEarnings });
+                                    });
+                                }).catch(error => console.error("Failed to apply referrer reward: ", error));
+                            }
+                            closeModal('authModal');
+                        }).catch(dbError => alert("Failed to save profile data: " + dbError.message));
+                }).catch(error => alert("Sign-up failed: " + error.message));
+        }
+
+        function login() {
+            const email = document.getElementById('authEmail').value;
+            const password = document.getElementById('authPassword').value;
+            if (!email || !password) { alert("Please enter email and password."); return; }
+            auth.signInWithEmailAndPassword(email, password).then(userCredential => { updateUserInFirestore({ lastlogingDate: firebase.firestore.FieldValue.serverTimestamp() }); closeModal('authModal'); }).catch(error => alert("Login failed: " + error.message));
+        }
+        
+        function signInWithGoogle() {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithPopup(provider).then(result => { closeModal('authModal'); }).catch(error => alert("Google Sign-In failed: " + error.message));
+        }
+        
+        function logout() { auth.signOut().then(() => { location.reload(); }).catch(error => { console.error("Sign out error", error); }); }
+        
+        async function watchAd() {
+            if (!currentUser) { showModal('authModal'); return; }
+
+            const now = new Date();
+            const lastTaskTime = userData.lastTaskTimestamp ? userData.lastTaskTimestamp.toDate() : new Date(0);
+            const timeDiff = now.getTime() - lastTaskTime.getTime();
+            const oneHour = 60 * 60 * 1000;
+
+            let tasksThisHour = userData.tasksCompletedThisHour || 0;
+
+            if (timeDiff > oneHour) {
+                tasksThisHour = 0;
+            }
+            
+            const TASK_LIMIT = 20;
+            if (tasksThisHour >= TASK_LIMIT) {
+                const timeLeft = oneHour - timeDiff;
+                const minutesLeft = Math.ceil(timeLeft / (60 * 1000));
+                alert(`You have reached your hourly limit of ${TASK_LIMIT} tasks. Please try again in ${minutesLeft} minutes.`);
+                return;
+            }
+
+            const adModal = document.getElementById('adModal');
+            const adTitle = document.getElementById('adTitle');
+            const adTimer = document.getElementById('adTimer');
+            adModal.style.display = 'flex';
+            let seconds = 30;
+            adTitle.textContent = `Completing Task (${tasksThisHour + 1}/${TASK_LIMIT})`;
+            
+            const countdown = setInterval(() => {
+                seconds--;
+                adTimer.textContent = `00:${seconds < 10 ? '0' + seconds : seconds}`;
+                
+                if (seconds <= 0) {
+                    clearInterval(countdown);
+                    closeAd();
+                    
+                    const newTasksCompleted = tasksThisHour + 1;
+                    let pointsEarned = 30;
+                    let bonusMessage = "";
+
+                    if (newTasksCompleted % 10 === 0) {
+                        pointsEarned += 20;
+                        bonusMessage = `\nCongratulations! You also received a 20 point bonus for completing 10 tasks!`;
+                    }
+
+                    const newPoints = (userData.points || 0) + pointsEarned;
+                    
+                    const updateData = {
+                        points: newPoints,
+                        tasksCompletedThisHour: newTasksCompleted,
+                        lastTaskTimestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    };
+                    
+                    updateUserInFirestore(updateData).then(() => {
+                        userData.points = newPoints;
+                        userData.tasksCompletedThisHour = newTasksCompleted;
+                        userData.lastTaskTimestamp = { toDate: () => new Date() }; 
+                        
+                        document.getElementById('pointsValue').textContent = newPoints;
+                        alert(`You earned ${pointsEarned} points.${bonusMessage}`);
+                    });
+                }
+            }, 1000);
+        }
+
+        const wheelCanvas = document.getElementById('wheelCanvas');
+        const ctx = wheelCanvas.getContext('2d');
+        const segments = [ { color: '#e74c3c', value: 10 }, { color: '#3498db', value: 50 }, { color: '#2ecc71', value: 20 }, { color: '#f1c40f', value: 100 }, { color: '#e67e22', value: 30 }, { color: '#1abc9c', value: 70 }, { color: '#34495e', value: 40 }, { color: '#9b59b6', value: 90 }, { color: '#e74c3c', value: 10 }, { color: '#3498db', value: 80 }, { color: '#2ecc71', value: 20 }, { color: '#f1c40f', value: 60 }];
+        const numSegments = segments.length;
+        const anglePerSegment = (2 * Math.PI) / numSegments;
+        let currentRotation = 0;
+        let spinning = false;
+
+        function drawWheel(rotationAngle = 0) {
+            ctx.clearRect(0, 0, 300, 300);
+            ctx.save();
+            ctx.translate(150, 150);
+            ctx.rotate(rotationAngle);
+            for (let i = 0; i < numSegments; i++) {
+                const startAngle = i * anglePerSegment;
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.arc(0, 0, 140, startAngle, startAngle + anglePerSegment);
+                ctx.closePath();
+                ctx.fillStyle = segments[i].color;
+                ctx.fill();
+            }
+            ctx.beginPath();
+            ctx.arc(0, 0, 148, 0, 2 * Math.PI);
+            ctx.strokeStyle = '#f39c12';
+            ctx.lineWidth = 10;
+            ctx.stroke();
+            for (let i = 0; i < numSegments; i++) {
+                const startAngle = i * anglePerSegment;
+                ctx.save();
+                ctx.rotate(startAngle + anglePerSegment / 2);
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.lineTo(140, 0);
+                ctx.strokeStyle = "rgba(0,0,0,0.2)";
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                ctx.fillStyle = "white";
+                ctx.font = "bold 18px Arial";
+                ctx.textAlign = "right";
+                ctx.textBaseline = "middle";
+                ctx.fillText(segments[i].value, 120, 0);
+                ctx.restore();
+            }
+            ctx.restore();
+            ctx.beginPath();
+            ctx.arc(150, 150, 40, 0, 2 * Math.PI);
+            ctx.fillStyle = '#e67e22';
+            ctx.fill();
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 4;
+            ctx.stroke();
+            ctx.fillStyle = "white";
+            ctx.font = "bold 24px Arial";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText("SPIN", 150, 150);
+        }
+
+        function spinWheel() {
+            if (spinning || userData.spinToday <= 0) return;
+            spinning = true;
+            document.getElementById('spinButton').disabled = true;
+            const winningSegmentIndex = Math.floor(Math.random() * numSegments);
+            const winningValue = segments[winningSegmentIndex].value;
+            const extraRotations = 5 * (2 * Math.PI);
+            const winningAngle = winningSegmentIndex * anglePerSegment;
+            const targetRotation = extraRotations + (2 * Math.PI) - winningAngle - (anglePerSegment / 2);
+            let start = null;
+            const duration = 5000;
+            function animate(timestamp) {
+                if (!start) start = timestamp;
+                const progress = timestamp - start;
+                const easeOutProgress = 1 - Math.pow(1 - Math.min(progress / duration, 1), 4);
+                const rotation = currentRotation + (easeOutProgress * (targetRotation - (currentRotation % (2 * Math.PI)) ) );
+                drawWheel(rotation);
+                if (progress < duration) {
+                    requestAnimationFrame(animate);
+                } else {
+                    currentRotation = rotation % (2 * Math.PI);
+                    spinning = false;
+                    document.getElementById('spinButton').disabled = false;
+                    const newPoints = (userData.points || 0) + winningValue;
+                    const newSpinsLeft = (userData.spinToday || 0) - 1;
+                    updateUserInFirestore({ points: newPoints, spinToday: newSpinsLeft }).then(() => {
+                        userData.points = newPoints;
+                        userData.spinToday = newSpinsLeft;
+                        loadUserData(currentUser); 
+                        document.getElementById('resultPoints').textContent = `${winningValue} points`;
+                        showModal('resultPopup');
+                    });
+                }
+            }
+            requestAnimationFrame(animate);
+        }
+
+        async function convertPoints() {
+            const pointsToConvert = parseInt(document.getElementById('pointsToConvert').value);
+            if (!pointsToConvert || pointsToConvert < 1000 || pointsToConvert > userData.points) { alert("Invalid points amount."); return; }
+            const takaEarned = (pointsToConvert / 1000) * 2;
+            const newPoints = userData.points - pointsToConvert;
+            const newTotalEarning = (userData.totalEarning || 0) + takaEarned;
+            await updateUserInFirestore({ points: newPoints, totalEarning: newTotalEarning });
+            loadUserData(currentUser);
+            alert(`Successfully converted ${pointsToConvert} points to ৳${takaEarned.toFixed(2)}!`);
+        }
+
+        async function processWithdrawal() {
+            if (!currentUser) return;
+            const amount = parseInt(document.getElementById('withdrawAmount').value);
+            const accountNumber = document.getElementById('accountNumber').value;
+            const type = document.getElementById('modalTitle').textContent;
+            if (!amount || !accountNumber) { alert("Please fill all details."); return; }
+            if (amount > (userData.totalEarning || 0)) { alert("Insufficient earnings for this withdrawal."); return; }
+            let withdrawalData = {};
+            if (type.includes("Bkash")) { withdrawalData = { bkash: "tast", bkashnumber: accountNumber };
+            } else if (type.includes("Nagad")) { withdrawalData = { nogod: "tast", nogodnumber: accountNumber };
+            } else if (type.includes("Recharge")) { withdrawalData = { recharge: "tast", mobilerecharge: accountNumber }; }
+            const requestDoc = { uid: currentUser.uid, account: amount, status: "pending", date: new Date(), ...withdrawalData };
+            try {
+                await db.collection('withdrawalRequest').add(requestDoc);
+                alert("Withdrawal request sent successfully!");
+                closeModal('withdrawModal');
+            } catch (error) { console.error("Error sending withdrawal request:", error); alert("Failed to send request."); }
+        }
+
+        async function loadWithdrawalHistory() {
+            if (!currentUser) return;
+            const historyList = document.getElementById('historyList');
+            historyList.innerHTML = '<p style="text-align:center;">Loading history...</p>';
+            try {
+                const querySnapshot = await db.collection('withdrawalRequest')
+                    .where('uid', '==', currentUser.uid)
+                    .orderBy('date', 'desc')
+                    .get();
+                if (querySnapshot.empty) {
+                    historyList.innerHTML = '<p id="no-history-message">You have no withdrawal history yet.</p>';
+                    return;
+                }
+                historyList.innerHTML = '';
+                querySnapshot.forEach(doc => {
+                    const request = doc.data();
+                    let type = "Withdrawal";
+                    if (request.bkash) type = "Bkash";
+                    else if (request.nogod) type = "Nagad";
+                    else if (request.recharge) type = "Mobile Recharge";
+                    const date = request.date.toDate().toLocaleString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'history-item';
+                    itemDiv.innerHTML = `<div class="history-info"><span class="history-type">Withdrawal to ${type}</span><small class="history-date">${date}</small></div><div class="history-details"><span class="history-amount">৳${request.account.toFixed(2)}</span><span class="history-status ${request.status.toLowerCase()}">${request.status}</span></div>`;
+                    historyList.appendChild(itemDiv);
+                });
+            } catch (error) {
+                console.error("Error loading withdrawal history:", error);
+                historyList.innerHTML = '<p style="text-align:center; color:red;">Could not load history.</p>';
+            }
+        }
+
+        let isLoginMode = true;
+        function toggleAuthMode() {
+            isLoginMode = !isLoginMode;
+            const title = document.getElementById('authTitle');
+            const subtitle = document.getElementById('authSubtitle');
+            const actionButton = document.getElementById('authActionButton');
+            const toggleText = document.getElementById('authToggle');
+            const confirmPasswordGroup = document.getElementById('confirmPasswordGroup');
+            const usernameGroup = document.getElementById('usernameGroup');
+            const referralCodeGroup = document.getElementById('referralCodeGroup');
+            if (isLoginMode) {
+                title.textContent = "Welcome Back!";
+                subtitle.textContent = "Please enter your details to login.";
+                actionButton.textContent = "Login";
+                actionButton.onclick = login;
+                toggleText.innerHTML = `Don't have an account? <span id="authToggleText" onclick="toggleAuthMode()">Sign Up</span>`;
+                confirmPasswordGroup.style.display = 'none';
+                usernameGroup.style.display = 'none';
+                referralCodeGroup.style.display = 'none';
+            } else {
+                title.textContent = "Create an Account";
+                subtitle.textContent = "Join us and start earning today!";
+                actionButton.textContent = "Sign Up";
+                actionButton.onclick = signUp;
+                toggleText.innerHTML = `Already have an account? <span id="authToggleText" onclick="toggleAuthMode()">Login</span>`;
+                confirmPasswordGroup.style.display = 'block';
+                usernameGroup.style.display = 'block';
+                referralCodeGroup.style.display = 'block';
+            }
+        }
+        
+        function init(){ drawWheel(); }
+
+        function showSection(sectionId) {
+            document.querySelectorAll('.section').forEach(section => { section.style.display = 'none' });
+            document.getElementById(sectionId + 'Section').style.display = 'block';
+            if (sectionId === 'history') { loadWithdrawalHistory(); }
+        }
+
+        function closeAd(){document.getElementById('adModal').style.display='none'}
+        function showAdBeforeSpin(){if(!currentUser){showModal('authModal');return}if(spinning||userData.spinToday<=0){if(userData.spinToday<=0)alert("No spins left for today!");return}const spinAdModal=document.getElementById('spinAdModal');let seconds=30;spinAdModal.style.display='flex';const countdown=setInterval(()=>{seconds--;document.getElementById('spinAdTimer').textContent=`00:${seconds<10?'0'+seconds:seconds}`;if(seconds<=0){clearInterval(countdown);closeModal('spinAdModal');spinWheel()}},1000)}
+        function showModal(modalId){document.getElementById(modalId).style.display='flex'}
+        function closeModal(modalId){document.getElementById(modalId).style.display='none'}
+        function closeResultPopup(){document.getElementById('resultPopup').style.display='none'}
+        function copyReferral(){if(!currentUser){showModal('authModal');return}navigator.clipboard.writeText(userData.myreferralCode);alert("Referral code copied!")}
+        function showWithdrawModal(type){if(!currentUser){showModal('authModal');return}const modal=document.getElementById('withdrawModal');const modalTitle=document.getElementById('modalTitle');let title="";switch(type){case 'recharge':title="Mobile Recharge";break;case 'bkash':title="Withdraw to Bkash";break;case 'nagad':title="Withdraw to Nagad";break}modalTitle.textContent=title;modal.style.display="flex"}
+
+        window.onload = init;
+    </script>
+</body>
+</html>
